@@ -1,0 +1,19 @@
+---
+include:
+  - project: "Bigouden/gitlab-ci-templates"
+    file: ".gitlab-ci-docker.yml"
+  - project: "Bigouden/gitlab-ci-templates"
+    file: ".gitlab-ci-prometheus.yml"
+
+variables:
+  CONTAINER_CLIENT_IMAGE: alpine:latest
+  UPTIME_ROBOT_API_KEY: $UPTIME_ROBOT_API_KEY
+
+stages:
+  - Quality
+  - Security
+  - Build
+  - Test
+  - Inspect
+  - Release
+  - Clean
