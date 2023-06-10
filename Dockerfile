@@ -25,7 +25,7 @@ RUN --mount=type=bind,from=builder,source=/usr/bin/envsubst,target=/usr/bin/envs
     --mount=type=bind,from=builder,source=/tmp,target=/tmp \
     --mount=type=cache,id=apk_cache,target=/var/cache/apk \
     --mount=type=cache,id=pip_cache,target=/root/.cache \
-    apk add --update `envsubst < /tmp/apk_packages` \
+    apk --update add `envsubst < /tmp/apk_packages` \
     && python3 -m venv "${VIRTUAL_ENV}" \
     && pip install --no-dependencies --no-binary :all: `envsubst < /tmp/pip_packages` \
     && pip uninstall -y setuptools pip \
