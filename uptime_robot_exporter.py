@@ -81,8 +81,13 @@ except ValueError:
 
 METRICS = [
     {
-        "name": "uptime_robot_status",
+        "name": "status",
         "description": "Uptime Robot Status",
+        "type": "gauge",
+    },
+    {
+        "name": "response_times",
+        "description": "Uptime Robot Response Time",
         "type": "gauge",
     },
 ]
@@ -102,7 +107,13 @@ class UptimeRobotCollector:
     @staticmethod
     def _get_monitors():
         url = "https://api.uptimerobot.com/v2/getMonitors"
-        payload = f"api_key={UPTIME_ROBOT_API_KEY}&format=json"
+        payload = (
+            f"api_key={UPTIME_ROBOT_API_KEY}"
+            f"&format=json"
+            f"&response_times=1"
+            f"&response_times_limit=1"
+            f"&response_times_average=0"
+        )
         headers = {
             "content-type": "application/x-www-form-urlencoded",
             "cache-control": "no-cache",
@@ -123,28 +134,42 @@ class UptimeRobotCollector:
     def get_metrics(self):
         """Retrieve Prometheus Metrics"""
         metrics = []
-        metric_name = "uptime_robot_status"
-        metric_description = [
-            metric["description"] for metric in METRICS if metric_name == metric["name"]
-        ][0]
-        metric_type = [
-            metric["type"] for metric in METRICS if metric_name == metric["name"]
-        ][0]
         for monitor in self._get_monitors()["monitors"]:
             metric_labels = {
                 k: str(v)
                 for k, v in monitor.items()
-                if v and v is not None and k != "status"
+                if v
+                and v is not None
+                and k not in [metric["name"] for metric in METRICS]
+                and k != "average_response_time"
             }
-            metrics.append(
-                {
-                    "name": metric_name,
-                    "description": metric_description,
-                    "type": metric_type,
-                    "labels": metric_labels,
-                    "value": monitor["status"],
-                }
-            )
+
+            for key, value in monitor.items():
+                if key in [metric["name"] for metric in METRICS]:
+                    metric_name = f"uptime_robot_{key}"
+                    metric_description = [
+                        metric["description"]
+                        for metric in METRICS
+                        if key == metric["name"]
+                    ][0]
+                    metric_type = [
+                        metric["type"] for metric in METRICS if key == metric["name"]
+                    ][0]
+                    if key == "response_times":
+                        metric_name = "uptime_robot_response_time"
+                        metric_value = value[0]["value"]
+                    else:
+                        metric_value = value
+
+                    metrics.append(
+                        {
+                            "name": metric_name,
+                            "description": metric_description,
+                            "type": metric_type,
+                            "labels": metric_labels,
+                            "value": metric_value,
+                        }
+                    )
         logging.info("Metrics : %s", metrics)
         return metrics
 
