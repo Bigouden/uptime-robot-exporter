@@ -181,7 +181,7 @@ class UptimeRobotCollector:
             "content-type": "application/x-www-form-urlencoded",
             "cache-control": "no-cache",
         }
-        res = requests.request("POST", url, data=payload, headers=headers)
+        res = requests.request("POST", url, data=payload, headers=headers, timeout=5)
         if res.status_code != 200:
             logging.error("Invalid HTTP Status Code : %s", res.status_code)
             os._exit(1)
