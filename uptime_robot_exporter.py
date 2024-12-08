@@ -174,8 +174,8 @@ class UptimeRobotCollector:
             f"api_key={UPTIME_ROBOT_API_KEY}"
             f"&format=json"
             f"&response_times=1"
-            f"&response_times_limit=1"
-            f"&response_times_average=0"
+            f"&responses_times_limit=1"
+            f"&responses_times_average=0"
         )
         headers = {
             "content-type": "application/x-www-form-urlencoded",
